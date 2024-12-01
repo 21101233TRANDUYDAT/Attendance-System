@@ -1,0 +1,40 @@
+firebase:
+  database_url: "https://faceattendancerealtime-3674d-default-rtdb.asia-southeast1.firebasedatabase.app/"
+  credential_file: "serviceAccount.json"
+
+models:
+  face_analysis_model: "buffalo_l"
+  antispoofing_model: "data/pretrained/fasnet_v1se_v2.pth.tar"
+
+recognition:
+  similarity_threshold: 16
+  margin: 0.4
+  s: 64
+  real_threshold: 10
+  spoof_threshold: 2
+  num_true: 0
+  num_false: 0
+  spoof_time_threshold: 10
+  unknown_time_threshold: 20
+  last_spoof_time: 0
+  last_unknown_time: 0
+
+capture:
+  dataset_dir: "dataset"
+  max_images: 5
+  violations : "violations_folder"
+
+
+encoding:
+  dataset_dir: "dataset"
+  output_file: "encoding_face.yaml"
+
+time:
+  check_out_time: "15:27:00"
+  condition_time: "09:00:00"
+
+cloudinary:
+  cloud_name: "dxnuejugo"
+  api_key: "976429413698181"
+  api_secret: "cA_FQzI87lIPVSoscffSHsKsLJI"
+  folder: "violations"
