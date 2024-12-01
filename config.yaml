@@ -1,5 +1,5 @@
 firebase:
-  database_url: "https://faceattendancerealtime-3674d-default-rtdb.asia-southeast1.firebasedatabase.app/"
+  database_url: ""
   credential_file: "serviceAccount.json"
 
 models:
@@ -34,7 +34,7 @@ time:
   condition_time: "09:00:00"
 
 cloudinary:
-  cloud_name: "dxnuejugo"
-  api_key: "976429413698181"
-  api_secret: "cA_FQzI87lIPVSoscffSHsKsLJI"
-  folder: "violations"
+  cloud_name: 
+  api_key: 
+  api_secret: 
+  folder: 
