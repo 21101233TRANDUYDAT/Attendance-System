@@ -6,18 +6,18 @@ if __name__ == "__main__":
 
     #add new employee
     # firebase.add_employee(
-    #     employee_id="21101711",
-    #     name="CAO THUY PHUONG",
-    #     major="Marketing",
-    #     age= 24,
-    #     email="caophuong@gmail.com",
-    #     phone_number="0355381111",
-    #     password= "251100",
-    #     role= "user"
+    #     employee_id="21101233",
+    #     name="TRAN DUY DAT",
+    #     major="Computer Science",
+    #     age=24,
+    #     email="tranduydat2511@gmail.com",
+    #     phone_number="01063552511",
+    #     password="001125",
+    #     role="admin"
     # )
 
     # #update employee information
-    employee_id = "21101711"
+    employee_id = "21101233"
     # updates = {
     #     "check_in_time": datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
     #     "attendance": 10,
@@ -27,13 +27,13 @@ if __name__ == "__main__":
     # firebase.update_employee(employee_id, updates)
     #
     # #get information
-    # employee_data = firebase.get_employee(employee_id)
-    # if employee_data:
-    #     print("Employee Data:")
-    #     for key, value in employee_data.items():
-    #         print(f"{key}:{value}")
-    # else:
-    #     print("Employee not found.")
+    employee_data = firebase.get_employee(employee_id)
+    if employee_data:
+        print("Employee Data:")
+        for key, value in employee_data.items():
+            print(f"{key}:{value}")
+    else:
+        print("Employee not found.")
 
     # # get information with field
     # employee_name = firebase.get_employee(employee_id,field="name")
@@ -47,10 +47,10 @@ if __name__ == "__main__":
     # last_check_in_date = datetime.strptime(check_in_time, '%Y-%m-%d %H:%M:%S').date()
     # print(last_check_in_date)
     #
-    # #log access update:
+    #log access update:
     # firebase.log_access(
     #     employee_id=employee_id,
-    #     status="check-out",
+    #     status="Already Checked",
     #     timestamp=datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     # )
     # #get access_logs

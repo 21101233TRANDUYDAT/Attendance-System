@@ -1,5 +1,5 @@
 firebase:
-  database_url: ""
+  database_url: "https://faceattendancerealtime-3674d-default-rtdb.asia-southeast1.firebasedatabase.app/"
   credential_file: "serviceAccount.json"
 
 models:
@@ -8,7 +8,7 @@ models:
 
 recognition:
   similarity_threshold: 16
-  margin: 0.4
+  margin: 0.3
   s: 64
   real_threshold: 10
   spoof_threshold: 2
@@ -16,8 +16,6 @@ recognition:
   num_false: 0
   spoof_time_threshold: 10
   unknown_time_threshold: 20
-  last_spoof_time: 0
-  last_unknown_time: 0
 
 capture:
   dataset_dir: "dataset"
@@ -34,7 +32,7 @@ time:
   condition_time: "09:00:00"
 
 cloudinary:
-  cloud_name: 
-  api_key: 
-  api_secret: 
-  folder: 
+  cloud_name: dxnuejugo
+  api_key: 976429413698181
+  api_secret: cA_FQzI87lIPVSoscffSHsKsLJI
+  folder: violations

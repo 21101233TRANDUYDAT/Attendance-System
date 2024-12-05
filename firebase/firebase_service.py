@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from utils.config import load_config
 import firebase_admin
 from firebase_admin import credentials, db, auth
@@ -110,6 +110,19 @@ class FirebaseService:
         :return:
         """
         ref = db.reference(f'AccessLogs/{employee_id}')
+
+        # Lấy log gần nhất
+        last_log = ref.order_by_key().limit_to_last(1).get()
+        if last_log:
+            last_log_data = list(last_log.values())[0]
+            last_timestamp = datetime.strptime(last_log_data.get("timestamp"), "%Y-%m-%d %H:%M:%S")
+            current_timestamp = datetime.strptime(timestamp, "%Y-%m-%d %H:%M:%S")
+
+            # Kiểm tra khoảng thời gian
+            if current_timestamp - last_timestamp < timedelta(minutes=1):
+                print("Log skipped due to time threshold.")
+                return
+
         ref.push({
             "status": status,
             "timestamp": timestamp
@@ -293,6 +306,6 @@ class FirebaseService:
 
             # Ghi log vào Firebase
             db.reference(f'AlertAccess/{alert_id}').set(log_data)
-            print(f"Log alert thành công: {alert_id}")
+            print(f"Log alert successfully!: {alert_id}")
         except Exception as e:
             print(f"Lỗi khi ghi log alert: {e}")

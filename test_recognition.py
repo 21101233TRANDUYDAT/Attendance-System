@@ -22,12 +22,13 @@ def main():
         if not ret:
             print("Không nhận được frame từ camera!")
             break
-        # crop frame
-        frame = face_recognition.crop_frame(frame)
-        # target face
-        frame, start_point, end_point = drawer.draw_target_frame(frame, 310, (0, 0, 255))
+
         faces = face_recognition.detect_faces(frame)
-        face_recognition.process_frame(frame, faces, start_point, end_point, drawer)
+        for face in faces:
+            bbox = face.bbox.astype(int)
+            face_embedding = face.normed_embedding.flatten()
+            face_recognition.recognize_face(face_embedding)
+            face_recognition.handle_recognition(frame, bbox, face_embedding, drawer)
 
         cv2.imshow('frame', frame)
         if cv2.waitKey(1) == ord('q'):

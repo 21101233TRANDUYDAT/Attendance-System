@@ -12,7 +12,6 @@ import numpy as np
 
 class VideoProcessor:
     """
-    Xử lý luồng video và nhận diện khuôn mặt.
     """
     def __init__(self, cap, face_recognition, drawer, app, stop_event, firebase_queue, firebase_service):
         self.cap = cap

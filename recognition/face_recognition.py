@@ -54,8 +54,8 @@ class FaceRecognition:
         self.num_false = recognition_config["num_false"]
         self.unknown_time_threshold = recognition_config["unknown_time_threshold"]
         self.spoof_time_threshold = recognition_config["spoof_time_threshold"]
-        self.last_unknown_time = recognition_config["last_unknown_time"]
-        self.last_spoof_time = recognition_config["last_spoof_time"]
+        self.last_unknown_time = None
+        self.last_spoof_time = None
 
 
     def load_face_encoding_parameters(self):
@@ -223,9 +223,10 @@ class FaceRecognition:
         :return:
         """
         identity, similarity, user_id = self.recognize_face(face_embedding)
-        if identity != "Unknown":
+        split_name = identity.split('_')[0] if '_' in identity else identity
+        if split_name != "Unknown":
             drawer.draw_rectangle(frame, bbox, (0, 255, 0))
-            drawer.put_text(frame, f"{identity} {similarity:.2f}", (bbox[0], bbox[1] - 10),(0, 255, 0))
+            drawer.put_text(frame, f"{split_name}", (bbox[0], bbox[1] - 10),(0, 255, 0))
             drawer.put_text(frame, f"{user_id}", (bbox[0], bbox[3] + 30), (0, 255, 0))
             return user_id
         else:
@@ -244,18 +245,32 @@ class FaceRecognition:
 
         current_time = time.time()
 
-        # if status is 'spoof'
+        # Xử lý cảnh báo spoof
         if status == "spoof":
+            # Kiểm tra lần đầu
+            if self.last_spoof_time is None:
+                self.last_spoof_time = current_time
+                print("First spoof detected, skipping upload.")
+                return None
+
+            # Kiểm tra ngưỡng thời gian
             if current_time - self.last_spoof_time > self.spoof_time_threshold:
-                # call function save_and_upload
                 img_path = self.face_process.save_warning(frame, bbox, status)
                 self.last_spoof_time = current_time
+                print(f"Spoof warning saved: {img_path}")
                 return img_path
 
-        # if status is 'unknown'
+        # Xử lý cảnh báo unknown
         elif status == "unknown":
+            # Kiểm tra lần đầu
+            if self.last_unknown_time is None:
+                self.last_unknown_time = current_time
+                print("First unknown detected, skipping upload.")
+                return None
+
+            # Kiểm tra ngưỡng thời gian
             if current_time - self.last_unknown_time > self.unknown_time_threshold:
-                # call function save_and_upload
                 img_path = self.face_process.save_warning(frame, bbox, status)
                 self.last_unknown_time = current_time
+                print(f"Unknown warning saved: {img_path}")
                 return img_path
