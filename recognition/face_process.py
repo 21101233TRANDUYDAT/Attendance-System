@@ -46,7 +46,7 @@ class Face_process:
 
         num_saved = 0
         count = len(os.listdir(user_dir))
-        frame_count = 0  # Counter to track the number of frames read
+        frame_count = 0
 
         while num_saved < self.max_images:
             ret, frame = cap.read()
@@ -54,9 +54,8 @@ class Face_process:
                 print("Cannot receive frame from the video source.")
                 break
 
-            frame_count += 1  # Increment the frame count
+            frame_count += 1
 
-            # Chỉ xử lý và lưu ảnh mỗi 10 frame
             if frame_count % 10 != 0:
                 continue
 

@@ -12,15 +12,14 @@ class GUI:
         self.processed_frame = None
         self.process_infor_label = None
         #
-        # self.title = title("Face Recognition System")
         self.root.geometry("434x750") #width x height
         self.root.resizable(False, False)
 
-        # Khởi tạo các thành phần giao diện
+        # init GUI
         self.create_video_label()
         self.create_status_frame()
 
-        # Khởi tạo giá trị ban đầu
+        # init def func
         self.update_image_label("resource/modes/waiting.png")
         self.update_time()
         self.update_frame()
@@ -72,12 +71,12 @@ class GUI:
 
     def update_processed_frame(self, frame):
         """
-        Nhận frame đã xử lý từ luồng video và lưu trữ để hiển thị.
+        get frame in queue
         """
         self.processed_frame = frame
 
     def update_time(self):
-        """Cập nhật thời gian thực."""
+        """get now time."""
         current_time = datetime.now().strftime("%H:%M:%S")
         current_date = datetime.now().strftime("%Y-%m-%d")
         self.time_label.config(text=current_time)
@@ -97,25 +96,21 @@ class GUI:
 
     def set_infor_label(self, name, major):
         """
-        Cập nhật thông tin vào process_infor_label.
-        :param name: Tên nhân viên.
-        :param major: Ngành học của nhân viên.
+        get name,major to show
         """
         self.process_infor_label = (name, major)
         self.update_infor_label()
 
     def reset_infor_label(self):
         """
-        Reset thông tin hiển thị về Unknown.
+        reset infor if can't recognition
         """
         self.set_infor_label("Unknown", "Unknown")
         self.update_infor_label()
 
     def show_custom_notification(self, message, duration=3000):
         """
-        Hiển thị thanh thông báo bằng Toplevel trong video_label.
-        :param message: Nội dung thông báo.
-        :param duration: Thời gian hiển thị (ms).
+        show notification
         """
         # Tính toán vị trí và kích thước của video_label
         video_label_x = self.video_label.winfo_rootx()
@@ -123,20 +118,20 @@ class GUI:
         video_label_width = self.video_label.winfo_width()
         video_label_height = self.video_label.winfo_height()
 
-        # Xác định vị trí Toplevel để nằm bên trong video_label
+        #  Toplevel
         popup_width = 300
         popup_height = 60
-        popup_x = video_label_x + (video_label_width - popup_width) // 2  # Căn giữa theo chiều ngang
-        popup_y = video_label_y + video_label_height - popup_height - 20  # Căn dưới cùng, cách 10px
+        popup_x = video_label_x + (video_label_width - popup_width) // 2
+        popup_y = video_label_y + video_label_height - popup_height - 20
 
-        # Tạo Toplevel cho thông báo
+        # make Toplevel notification
         popup = Toplevel(self.root)
         popup.title("Thông báo")
         popup.geometry(f"{popup_width}x{popup_height}+{popup_x}+{popup_y}")
         popup.resizable(False, False)
-        popup.overrideredirect(True)  # Loại bỏ viền cửa sổ
+        popup.overrideredirect(True)
 
-        # Thêm nội dung thông báo
+        # notification
         label = Label(
             popup,
             text=message,
@@ -149,12 +144,12 @@ class GUI:
         )
         label.pack(fill="both", expand=True)
 
-        # Tự động đóng thông báo sau `duration`
+        # close notifi after `duration`
         popup.after(duration, popup.destroy)
 
     def update_image_label(self, status):
         """
-            Cập nhật hình ảnh dựa trên trạng thái.
+            update img by status.
             :param status: Trạng thái (str) như "success", "spoof", "unknown", "late", "already_checked_in".
             """
         image_mapping = {
@@ -169,7 +164,7 @@ class GUI:
         self.image_label.config(image=img_tk)
         self.image_label.image = img_tk
 
-        # Hiển thị thông báo trong video_label
+        # show notification
         if status == "success":
             self.show_custom_notification("Check-in Successful!")
         elif status == "late":

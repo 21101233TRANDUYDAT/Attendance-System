@@ -10,18 +10,18 @@ import os
 class FirebaseService:
     def __init__(self, config_path="config.yaml"):
         """
-        khởi tạo Firebase với thông tin từ file config.yaml.
+        init Firebase with parameter from file config.yaml.
         """
         # load config file
         self.configs = load_config(config_path)
 
-        #cấu hình firebase
+        #firebase
         cred = credentials.Certificate(self.configs["firebase"]["credential_file"])
         firebase_admin.initialize_app(cred, {
             'databaseURL': self.configs["firebase"]["database_url"]
         })
 
-        # Cấu hình Cloudinary
+        #Cloudinary
         cloudinary.config(
             cloud_name=self.configs["cloudinary"]["cloud_name"],
             api_key=self.configs["cloudinary"]["api_key"],
@@ -39,21 +39,15 @@ class FirebaseService:
 
     def add_employee(self, employee_id, name, major, age, email, phone_number, role, password):
         """
-
-        :param employee_id: (str) Employee_ID
-        :param name: (str) Employee Name
-        :param major: (str) Employee major
-        :param age:(int) Employee age
-        :param email: (str) Employee email
-        :param phone_number: (str) Employee phone number
+        add new employee
         """
-        # Tạo tài khoản trên Firebase Authentication
+        # make account in Firebase Authentication
         user = auth.create_user(
             email=email,
             password=password,
             display_name=name
         )
-        uid = user.uid  # UID tự động được Firebase tạo
+        uid = user.uid  # UID
 
         ref = db.reference(f'Employee/{employee_id}')
         ref.set({
@@ -76,9 +70,6 @@ class FirebaseService:
     def update_employee(self, employee_id, updates):
         """
 
-        :param employee_id:
-        :param updates:
-        :return:
         """
         ref = db.reference(f'Employee/{employee_id}')
         ref.update(updates)
@@ -103,22 +94,18 @@ class FirebaseService:
 
     def log_access(self, employee_id, status, timestamp):
         """
-
-        :param employee_id:
-        :param status:
-        :param timestamp:
-        :return:
+        write log access
         """
         ref = db.reference(f'AccessLogs/{employee_id}')
 
-        # Lấy log gần nhất
+        # get current log
         last_log = ref.order_by_key().limit_to_last(1).get()
         if last_log:
             last_log_data = list(last_log.values())[0]
             last_timestamp = datetime.strptime(last_log_data.get("timestamp"), "%Y-%m-%d %H:%M:%S")
             current_timestamp = datetime.strptime(timestamp, "%Y-%m-%d %H:%M:%S")
 
-            # Kiểm tra khoảng thời gian
+            # check condition
             if current_timestamp - last_timestamp < timedelta(minutes=1):
                 print("Log skipped due to time threshold.")
                 return
@@ -166,6 +153,27 @@ class FirebaseService:
 
         return all_employees
 
+    def log_alert_access(self, alert_image_url, message="Invalid Access"):
+        """
+
+        """
+        try:
+            # make key
+            alert_id = db.reference('AlertAccess').push().key
+
+            # Dữ liệu log
+            log_data = {
+                "alertImage": alert_image_url,
+                "message": message,
+                "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            }
+
+            # write alert log in Firebase
+            db.reference(f'AlertAccess/{alert_id}').set(log_data)
+            print(f"Log alert successfully!: {alert_id}")
+        except Exception as e:
+            print(f"Error when write log alert: {e}")
+
     def update_attendance(self, employee_id):
         """
 
@@ -203,9 +211,6 @@ class FirebaseService:
     def check_in_condition(self, employee_data, today_date):
         """
 
-        :param employee_data:
-        :param today_date:
-        :return:
         """
         last_check_in_time = employee_data.get("check_in_time")
         last_check_in_date = datetime.strptime(last_check_in_time,'%Y-%m-%d %H:%M:%S').date() if last_check_in_time else None
@@ -214,10 +219,6 @@ class FirebaseService:
     def check_out_condition(self, employee_data, today_date, current_time):
         """
 
-        :param employee_data:
-        :param today_date:
-        :param current_time:
-        :return:
         """
         last_check_out_time = employee_data.get("check_out_time")
         last_check_out_date = datetime.strptime(last_check_out_time,'%Y-%m-%d %H:%M:%S').date() if last_check_out_time else None
@@ -226,10 +227,6 @@ class FirebaseService:
     def handle_check_in(self, employee_id, employee_data, current_time):
         """
 
-        :param employee_id:
-        :param employee_data:
-        :param current_time:
-        :return:
         """
         updates = {
             "check_in_time": current_time.strftime('%Y-%m-%d %H:%M:%S'),
@@ -252,10 +249,6 @@ class FirebaseService:
     def handle_check_out(self, employee_id, employee_data, current_time):
         """
 
-        :param employee_id:
-        :param employee_data:
-        :param current_time:
-        :return:
         """
         updates = {
             "check_out_time": current_time.strftime('%Y-%m-%d %H:%M:%S')
@@ -265,7 +258,7 @@ class FirebaseService:
         print(f"Check-out completed for employee {employee_id}.")
         return "check_out"
 
-    #=====================================================================
+    #===========================cloudinary==========================================
     def upload_to_cloudinary(self, image_path, status):
         """
         upload image to Cloudinary.
@@ -286,26 +279,4 @@ class FirebaseService:
             print(f"Error can't upload image to Cloudinary: {e}")
             return None
 
-    def log_alert_access(self, alert_image_url, message="Invalid Access"):
-        """
-        Ghi log một alert vào Firebase trong node AlertAccess.
-        :param alert_image_url: URL của ảnh (str).
-        :param message: Thông báo (str).
-        :return: None
-        """
-        try:
-            # Tạo một ID duy nhất cho mỗi log
-            alert_id = db.reference('AlertAccess').push().key
 
-            # Dữ liệu log
-            log_data = {
-                "alertImage": alert_image_url,
-                "message": message,
-                "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            }
-
-            # Ghi log vào Firebase
-            db.reference(f'AlertAccess/{alert_id}').set(log_data)
-            print(f"Log alert successfully!: {alert_id}")
-        except Exception as e:
-            print(f"Lỗi khi ghi log alert: {e}")

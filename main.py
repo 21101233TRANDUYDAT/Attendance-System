@@ -6,12 +6,10 @@ import tkinter as tk
 from gui.gui import GUI
 import threading
 from queue import Queue
-import numpy as np 
-
-
 
 class VideoProcessor:
     """
+    process video
     """
     def __init__(self, cap, face_recognition, drawer, app, stop_event, firebase_queue, firebase_service):
         self.cap = cap
@@ -27,29 +25,29 @@ class VideoProcessor:
         while not self.stop_event.is_set():
             ret, frame = self.cap.read()
             if not ret:
-                print("Không nhận được frame từ camera!")
+                print("Could not receive frame from camera!")
                 break
 
-            # Cắt và vẽ khung mục tiêu
+            # crop frame
             frame = self.face_recognition.crop_frame(frame)
             frame, start_point, end_point = self.drawer.draw_target_frame(frame, 350, (0, 0, 255))
 
-            # Phát hiện khuôn mặt
+            # face recognition
             faces = self.face_recognition.detect_faces(frame)
             processed_frame, bbox, recognized_user_id, face_status = self.face_recognition.process_frame(
                 frame, faces, start_point, end_point, self.drawer
             )
 
-            # Cập nhật giao diện
+            # update frame and img label
             self.app.update_processed_frame(processed_frame)
             self.app.update_image_label(face_status)
 
-            # Tải ảnh lên Cloudinary nếu cần
+            # upload img to cloud
             img_path = self.face_recognition.handle_warning(processed_frame, bbox, face_status)
             if img_path:
                 threading.Thread(target=self.upload_to_cloudinary, args=(img_path, face_status), daemon=True).start()
 
-            # Xử lý nhận diện khuôn mặt
+            # recognition process
             if recognized_user_id != self.last_recognized_id:
                 self.last_recognized_id = recognized_user_id
                 if recognized_user_id:
@@ -59,24 +57,24 @@ class VideoProcessor:
 
     def upload_to_cloudinary(self, img_path, face_status):
         """
-        Tải ảnh lên Cloudinary và trả về URL.
+        upload and write alert log
         """
         try:
             link_img = self.firebase_service.upload_to_cloudinary(img_path, face_status)
             if link_img:
-                # Ghi log alert lên Firebase
+                # write log alert on Firebase
                 self.firebase_service.log_alert_access(link_img, message=f"{face_status.capitalize()} detected")
-                print(f"Đường dẫn ảnh trên Cloudinary: {link_img}")
+                print(f"Image link on Cloudinary: {link_img}")
             else:
-                print("Không thể ghi log do lỗi upload Cloudinary.")
+                print("Cannot log due to Cloudinary upload error.")
         except Exception as e:
-            print(f"Lỗi khi tải lên Cloudinary: {e}")
+            print(f"Error uploading to Cloudinary: {e}")
 
 
 
 class FirebaseProcessor:
     """
-    Xử lý các tác vụ liên quan đến Firebase.
+    Firebase service
     """
     def __init__(self, firebase, app, queue, stop_event):
         self.firebase = firebase
@@ -87,7 +85,7 @@ class FirebaseProcessor:
     def process(self):
         while not self.stop_event.is_set():
             try:
-                employee_id = self.queue.get(timeout=1)  # Thời gian chờ để tránh treo luồng
+                employee_id = self.queue.get(timeout=1)
                 if employee_id:
                     name = self.firebase.get_employee(employee_id, "name")
                     major = self.firebase.get_employee(employee_id, "major")
@@ -98,17 +96,17 @@ class FirebaseProcessor:
                         self.app.update_image_label(firebase_status)
                 self.queue.task_done()
             except Exception:
-                pass  # Hàng đợi trống hoặc lỗi nhẹ
+                pass
 
 
 def setup_gui_and_processors():
     """
-    Thiết lập giao diện người dùng và các luồng xử lý.
+    GUI and processors
     """
     # Khởi tạo các thành phần chính
     cap = cv2.VideoCapture(0)
     if not cap.isOpened():
-        print("Không thể mở camera. Vui lòng kiểm tra kết nối!")
+        print("Cannot open camera. Please check the connection!")
         return
 
     face_recognition = FaceRecognition()
@@ -118,30 +116,30 @@ def setup_gui_and_processors():
     app = GUI(root, cap)
     stop_event = threading.Event()
 
-    # Khởi tạo hàng đợi và các bộ xử lý
+    # init queue
     firebase_queue = Queue()
     video_processor = VideoProcessor(cap, face_recognition, drawer, app, stop_event, firebase_queue, firebase)
     firebase_processor = FirebaseProcessor(firebase, app, firebase_queue, stop_event)
 
-    # Hàm xử lý khi đóng ứng dụng
+    # close process
     def on_closing():
-        print("Đang dừng các luồng xử lý...")
-        stop_event.set()  # Kích hoạt cờ dừng
+        print("Stopping processing threads...")
+        stop_event.set()
         root.quit()
 
     root.protocol("WM_DELETE_WINDOW", on_closing)
 
-    # Khởi chạy các luồng
+    # start queue
     threading.Thread(target=video_processor.process, daemon=True).start()
     threading.Thread(target=firebase_processor.process, daemon=True).start()
 
-    # Chạy giao diện Tkinter
+    # run GUI Tkinter
     root.mainloop()
 
-    # Giải phóng tài nguyên
+    # release window
     cap.release()
     cv2.destroyAllWindows()
-    print("Đã giải phóng tài nguyên!")
+    print("Resources released!")
 
 
 

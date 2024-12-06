@@ -28,7 +28,7 @@ class FaceRecognition:
 
     def load_model_parameters(self):
         """
-        Load các tham số liên quan đến model từ file cấu hình.
+        Load parameters model
         :return:
         """
         models_config = self.configs["models"]
@@ -84,9 +84,7 @@ class FaceRecognition:
 
     def detect_faces(self, frame):
         """
-        Phát hiện khuôn mặt trong frame.
-        :param frame:Ảnh đầu vào (numpy array).
-        :return: Danh sách các khuôn mặt được phát hiện.
+        detect face
         """
         try:
             faces = self.face_app.get(frame)
@@ -97,11 +95,7 @@ class FaceRecognition:
 
     def is_face_inside(self, bbox, start_point, end_point):
         """
-
-        :param bbox:
-        :param start_point:
-        :param end_point:
-        :return: true or false
+        check is face inside target
         """
         face_x1, face_y1, face_x2, face_y2 = bbox
         target_x1, target_y1 = start_point
@@ -112,9 +106,7 @@ class FaceRecognition:
 
     def check_spoofing(self, bbox, frame):
         """
-        Kiểm tra giả mạo khuôn mặt.
-        :param bbox: Bounding box của khuôn mặt.
-        :param frame: Ảnh đầu vào.
+        check spoof
         :return: Tuple (is_real, score).
         """
         spoofing_results = self.spoofing_detector([bbox], frame)
@@ -122,10 +114,7 @@ class FaceRecognition:
 
     def calculate_similarity(self, embedding1, embedding2):
         """
-        Tính toán độ tương đồng giữa hai embedding bằng công thức ArcFace.
-        :param embedding1: Embedding khuôn mặt thứ nhất.
-        :param embedding2: Embedding khuôn mặt thứ hai.
-        :return: Điểm số tương đồng (float).
+        cal similarity of 2 embedding
         """
         cosine_sim = np.dot(embedding1, embedding2) / (norm(embedding1) * norm(embedding2))
         theta = math.acos(min(1, max(-1, cosine_sim)))
@@ -134,9 +123,7 @@ class FaceRecognition:
 
     def recognize_face(self, face_embedding):
         """
-        So sánh embedding khuôn mặt với các encoding đã biết.
-        :param face_embedding: Embedding khuôn mặt.
-        :return: Tuple (identity, similarity_score).
+        recognize
         """
         best_similarity = 0
         best_identity = "Unknown"
@@ -157,13 +144,7 @@ class FaceRecognition:
 
     def process_frame(self, frame, faces, start_point, end_point, drawer):
         """
-
-        :param frame:
-        :param faces:
-        :param start_point:
-        :param end_point:
-        :param drawer:
-        :return:
+        process check target, check spoof and recognition
         """
         recognized_user_id = None
         status = ""
@@ -206,10 +187,7 @@ class FaceRecognition:
     #=====================handle_methods=========================
     def handle_spoofing(self, frame, bbox, drawer):
         """
-        :param frame:
-        :param bbox:
-        :param drawer:
-        :return:
+
         """
         drawer.draw_rectangle(frame, bbox, (0, 0, 255))
         drawer.put_text(frame, "Spoof", (bbox[0], bbox[1] - 10), (0, 0, 255))
@@ -217,17 +195,13 @@ class FaceRecognition:
     def handle_recognition(self, frame, bbox, face_embedding, drawer):
         """
 
-        :param frame:
-        :param bbox:
-        :param drawer:
-        :return:
         """
         identity, similarity, user_id = self.recognize_face(face_embedding)
         split_name = identity.split('_')[0] if '_' in identity else identity
         if split_name != "Unknown":
             drawer.draw_rectangle(frame, bbox, (0, 255, 0))
-            drawer.put_text(frame, f"{split_name}", (bbox[0], bbox[1] - 10),(0, 255, 0))
-            drawer.put_text(frame, f"{user_id}", (bbox[0], bbox[3] + 30), (0, 255, 0))
+            # drawer.put_text(frame, f"{split_name}", (bbox[0], bbox[1] - 10),(0, 255, 0))
+            # drawer.put_text(frame, f"{user_id}", (bbox[0], bbox[3] + 30), (0, 255, 0))
             return user_id
         else:
             drawer.draw_rectangle(frame, bbox, (0, 0, 255))
@@ -237,38 +211,32 @@ class FaceRecognition:
     def handle_warning(self, frame, bbox, status):
         """
 
-        :param frame:
-        :param bbox:
-        :param status:
-        :return:
         """
 
         current_time = time.time()
 
-        # Xử lý cảnh báo spoof
+        # process spoof
         if status == "spoof":
-            # Kiểm tra lần đầu
+            # check first time
             if self.last_spoof_time is None:
                 self.last_spoof_time = current_time
                 print("First spoof detected, skipping upload.")
                 return None
 
-            # Kiểm tra ngưỡng thời gian
             if current_time - self.last_spoof_time > self.spoof_time_threshold:
                 img_path = self.face_process.save_warning(frame, bbox, status)
                 self.last_spoof_time = current_time
                 print(f"Spoof warning saved: {img_path}")
                 return img_path
 
-        # Xử lý cảnh báo unknown
+        # process unknown
         elif status == "unknown":
-            # Kiểm tra lần đầu
+            # check first time
             if self.last_unknown_time is None:
                 self.last_unknown_time = current_time
                 print("First unknown detected, skipping upload.")
                 return None
 
-            # Kiểm tra ngưỡng thời gian
             if current_time - self.last_unknown_time > self.unknown_time_threshold:
                 img_path = self.face_process.save_warning(frame, bbox, status)
                 self.last_unknown_time = current_time

@@ -3,10 +3,8 @@ import torch
 
 if __name__ == "__main__":
     print(torch.cuda.is_available())
-    #
     face_process = Face_process()
 
-    #
     user_name = "dat_with_mark"
     user_id = "21101233"
     video_path = "face_data/dat1.mp4"
