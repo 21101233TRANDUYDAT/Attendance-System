@@ -14,13 +14,13 @@ def main():
     # Mở camera
     cap = cv2.VideoCapture(0)
     if not cap.isOpened():
-        print("Không thể mở camera. Vui lòng kiểm tra kết nối!")
+        print("Cannot open camera. Please check the connection!")
         return
 
     while True:
         ret, frame = cap.read()
         if not ret:
-            print("Không nhận được frame từ camera!")
+            print("Could not receive frame from camera!")
             break
 
         faces = face_recognition.detect_faces(frame)
