@@ -5,19 +5,19 @@ if __name__ == "__main__":
     firebase = FirebaseService()
 
     #add new employee
-    firebase.add_employee(
-        employee_id="21105555",
-        name="TRAN MANH HUNG",
-        major="Marketing",
-        age=24,
-        email="tranhung@gmail.com",
-        phone_number="01062521113",
-        password="000000",
-        role="ROLE_USER"
-    )
+    # firebase.add_employee(
+    #     employee_id="21105555",
+    #     name="TRAN MANH HUNG",
+    #     major="Marketing",
+    #     age=24,
+    #     email="tranhung@gmail.com",
+    #     phone_number="01062521113",
+    #     password="000000",
+    #     role="ROLE_USER"
+    # )
 
     # #update employee information
-    # employee_id = "21101233"
+    employee_id = "21101233"
     # updates = {
     #     "check_in_time": datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
     #     "attendance": 10,
@@ -27,13 +27,13 @@ if __name__ == "__main__":
     # firebase.update_employee(employee_id, updates)
     #
     # #get information
-    # employee_data = firebase.get_employee(employee_id)
-    # if employee_data:
-    #     print("Employee Data:")
-    #     for key, value in employee_data.items():
-    #         print(f"{key}:{value}")
-    # else:
-    #     print("Employee not found.")
+    employee_data = firebase.get_employee(employee_id)
+    if employee_data:
+        print("Employee Data:")
+        for key, value in employee_data.items():
+            print(f"{key}:{value}")
+    else:
+        print("Employee not found.")
 
     # # get information with field
     # employee_name = firebase.get_employee(employee_id,field="name")

@@ -106,7 +106,7 @@ class FirebaseService:
             current_timestamp = datetime.strptime(timestamp, "%Y-%m-%d %H:%M:%S")
 
             # check condition
-            if current_timestamp - last_timestamp < timedelta(minutes=1):
+            if current_timestamp - last_timestamp < timedelta(minutes=2):
                 print("Log skipped due to time threshold.")
                 return
 
@@ -200,7 +200,7 @@ class FirebaseService:
 
 
             print("Already Checked today!")
-            self.log_access(employee_id,"Already Checked", current_time.strftime('%Y-%m-%d %H:%M:%S'))
+            self.log_access(employee_id, "Already Checked", current_time.strftime('%Y-%m-%d %H:%M:%S'))
             return "already_checked"
             #update log access
         except Exception as e:

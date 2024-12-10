@@ -1,3 +1,4 @@
+import cv2
 import numpy as np
 import math
 from insightface.app import FaceAnalysis
@@ -157,6 +158,9 @@ class FaceRecognition:
             status = "waiting"
             return frame, bbox, recognized_user_id, status
         for face in faces:
+            landmarks = face.landmark_3d_68
+            for landmark in landmarks:
+                cv2.circle(frame, (int(landmark[0]), int(landmark[1])), 2, (0, 0, 255), -1)
             bbox = face.bbox.astype(int)
             face_embedding = face.normed_embedding.flatten()
             # check face in target?
@@ -225,7 +229,7 @@ class FaceRecognition:
 
             if current_time - self.last_spoof_time > self.spoof_time_threshold:
                 img_path = self.face_process.save_warning(frame, bbox, status)
-                self.last_spoof_time = current_time
+                self.last_spoof_time = None
                 print(f"Spoof warning saved: {img_path}")
                 return img_path
 
@@ -239,6 +243,6 @@ class FaceRecognition:
 
             if current_time - self.last_unknown_time > self.unknown_time_threshold:
                 img_path = self.face_process.save_warning(frame, bbox, status)
-                self.last_unknown_time = current_time
+                self.last_unknown_time = None
                 print(f"Unknown warning saved: {img_path}")
                 return img_path

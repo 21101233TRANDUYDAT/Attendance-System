@@ -14,7 +14,7 @@ recognition:
   spoof_threshold: 2
   num_true: 0
   num_false: 0
-  spoof_time_threshold: 10
+  spoof_time_threshold: 15
   unknown_time_threshold: 20
 
 capture:
@@ -28,8 +28,8 @@ encoding:
   output_file: "encoding_face.yaml"
 
 time:
-  check_out_time: "15:27:00"
-  condition_time: "09:00:00"
+  check_out_time: "17:00:00"
+  condition_time: "14:00:00"
 
 cloudinary:
   cloud_name: dxnuejugo

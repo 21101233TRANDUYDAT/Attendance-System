@@ -1,6 +1,6 @@
 from utils.encoding import load_face_encodings
 
-if __name__  == "__main__":
+if __name__ == "__main__":
     # Load face encodings
     inf = load_face_encodings()
 
