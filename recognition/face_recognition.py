@@ -219,6 +219,12 @@ class FaceRecognition:
 
         current_time = time.time()
 
+        # Reset times if the status is not 'spoof' or 'unknown'
+        if status not in ["spoof", "unknown"]:
+            self.last_spoof_time = None
+            self.last_unknown_time = None
+            return None
+
         # process spoof
         if status == "spoof":
             # check first time
